@@ -89,9 +89,10 @@ class ArticleImagePipeline(ImagesPipeline):
     """
 
     def item_completed(self, results, item, info):
-        for ok, value in results:
-            front_image_path = value['path']
-        item['front_image_path'] = front_image_path
+        if "front_image_path" in item:
+            for ok, value in results:
+                front_image_path = value['path']
+            item['front_image_path'] = front_image_path
         # 返回item以方便后面的pipeline对item进行处理
         return item
 
