@@ -78,6 +78,12 @@ IMAGES_URLS_FIELD = "front_image_url"
 project_dir = os.path.dirname(os.path.abspath(__file__))
 IMAGES_STORE = os.path.join(project_dir, 'images')
 
+# 将路径添加到python path当中，当文件中导入模块时，会从这个路径去找模块
+import sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "ArtSpider"))
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 # AUTOTHROTTLE_ENABLED = True
