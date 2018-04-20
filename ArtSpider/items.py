@@ -9,7 +9,7 @@ import scrapy
 import re
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from scrapy.loader import ItemLoader
-from ArtSpider.settings import SQL_DATE_FORMAT,SQL_DATETIME_FORMAT
+from ArtSpider.settings import SQL_DATE_FORMAT, SQL_DATETIME_FORMAT
 
 # 用于删除提取的html中的tag
 from w3lib.html import remove_tags
@@ -85,7 +85,7 @@ class JobBoleArticleItem(scrapy.Item):
         parsms = (self['title'], self['url'], self['create_date'], self['fav_nums'], self['url_object_id']
                   , self['front_image_url'], self['front_image_path'], self['praise_nums'], self['comment_nums']
                   , self['tags'], self['content'])
-        return insert_sql,parsms
+        return insert_sql, parsms
 
 
 class LagouJobItemLoader(ItemLoader):
@@ -131,7 +131,7 @@ def get_min_wyear(value):
 
 def get_max_wyear(value):
     # 经验3-5年 /
-    replace_char = ["经验", "年", "/"]
+    replace_char = ["经验", "年", "/", "以下", "以上"]
     for i in replace_char:
         if i in value:
             value = value.replace(i, "")
@@ -196,6 +196,23 @@ class LagouJobItem(scrapy.Item):
     company_url = scrapy.Field()
     company_name = scrapy.Field()
     crawl_time = scrapy.Field()
+
+    def get_insert_sql(self):
+        insert_sql = """
+                        insert into lagou_job(title,url,url_object_id,salary_min,salary_max,job_city,work_year_min,work_year_max,
+                                              degree_need,job_type,publish_time,job_advantage,job_desc,
+                                              job_addr,company_name,company_url,crawl_time,tag
+                                              ) 
+                        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        on duplicate key update job_desc=values(job_desc),tag=values(tag);
+                        """
+        parsms = (
+            self['title'], self['url'], self['url_object_id'], self['salary_min'], self['salary_max'], self['job_city']
+            , self['work_year_min'], self['work_year_max'], self['degree_need'], self['job_type']
+            , self['publish_time'], self['job_advantage'], self['job_desc'], self['job_addr'],
+            self['company_name'], self['company_url'], self['crawl_time'].strftime(SQL_DATETIME_FORMAT), self['tag']
+        )
+        return insert_sql, parsms
 
 
 """
