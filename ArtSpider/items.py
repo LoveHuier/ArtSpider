@@ -77,10 +77,11 @@ class JobBoleArticleItem(scrapy.Item):
 
     def get_insert_sql(self):
         insert_sql = """
-                                insert into jobbole_article(title,url,create_date,fav_nums,url_object_id,front_image_url,
-                                        front_image_path,praise_nums,comment_nums,tags,content) 
-                                values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
-                            """
+                        insert into jobbole_article(title,url,create_date,fav_nums,url_object_id,front_image_url,
+                                front_image_path,praise_nums,comment_nums,tags,content) 
+                        values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                        on duplicate key update fav_nums=values(fav_nums),comment_nums=values(comment_nums);
+                        """
         parsms = (self['title'], self['url'], self['create_date'], self['fav_nums'], self['url_object_id']
                   , self['front_image_url'], self['front_image_path'], self['praise_nums'], self['comment_nums']
                   , self['tags'], self['content'])

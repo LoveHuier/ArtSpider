@@ -66,9 +66,9 @@ class MysqlTwistedPipeline(object):
         """
         query = self.dbpool.runInteraction(self.do_insert, item)
         # 处理异常
-        query.addErrback(self.handle_error)
+        query.addErrback(self.handle_error, item, spider)
 
-    def handle_error(self, failure):
+    def handle_error(self, failure, item, spider):
         # 处理异步插入的异常,这个函数非常重要
         print(failure)
 
