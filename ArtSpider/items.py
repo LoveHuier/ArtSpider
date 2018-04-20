@@ -9,6 +9,7 @@ import scrapy
 import re
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from scrapy.loader import ItemLoader
+from ArtSpider.settings import SQL_DATE_FORMAT,SQL_DATETIME_FORMAT
 
 # 用于删除提取的html中的tag
 from w3lib.html import remove_tags
@@ -73,6 +74,17 @@ class JobBoleArticleItem(scrapy.Item):
         output_processor=Join(",")
     )
     content = scrapy.Field()
+
+    def get_insert_sql(self):
+        insert_sql = """
+                                insert into jobbole_article(title,url,create_date,fav_nums,url_object_id,front_image_url,
+                                        front_image_path,praise_nums,comment_nums,tags,content) 
+                                values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
+                            """
+        parsms = (self['title'], self['url'], self['create_date'], self['fav_nums'], self['url_object_id']
+                  , self['front_image_url'], self['front_image_path'], self['praise_nums'], self['comment_nums']
+                  , self['tags'], self['content'])
+        return insert_sql,parsms
 
 
 class LagouJobItemLoader(ItemLoader):

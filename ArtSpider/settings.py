@@ -111,3 +111,6 @@ MYSQL_DBNAME = "art_schema"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = "ts123456"
 MYSQL_PORT = 3306
+
+SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+SQL_DATE_FORMAT = "%Y-%m-%d"
