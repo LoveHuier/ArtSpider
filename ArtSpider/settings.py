@@ -52,9 +52,11 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'ArtSpider.middlewares.ArtspiderDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    'ArtSpider.middlewares.ArtspiderDownloaderMiddleware': None,
+    'ArtSpider.middlewares.RandomUserAgentMiddlware': 543,
+
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -105,6 +107,8 @@ sys.path.insert(0, os.path.join(BASE_DIR, "ArtSpider"))
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+# 定义控制开关
+RANDOM_UA_TYPE = "random"
 
 MYSQL_HOST = "127.0.0.1"
 MYSQL_DBNAME = "art_schema"
