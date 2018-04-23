@@ -124,3 +124,12 @@ class RandomUserAgentMiddlware(object):
             return getattr(self.ua, self.ua_type)
 
         request.headers.setdefault('User-Agent', get_ua())
+
+
+class RandomProxyMiddlware(object):
+    """
+    随机更换proxy
+    """
+    def process_request(self, request, spider):
+
+        request.mate['proxy']="http://221.321.45.43:8081"
