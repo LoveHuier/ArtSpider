@@ -135,23 +135,19 @@ class RandomProxyMiddlware(object):
         request.mate['proxy'] = "http://221.321.45.43:8081"
 
 
-from selenium import webdriver
 from scrapy.http import HtmlResponse
 
 
 class JSageMiddleware(object):
-    def __init__(self):
-        # 可共用一个浏览器，不用每个url都打开一个
-        self.browser = webdriver.Chrome(executable_path="/home/mata/Tools/driver/chromedriver")
-        super(JSageMiddleware, self).__init__()
-
     # 通过chrome请求动态网页
     def process_request(self, request, spider):
         if spider.name == "jobbole":
+            # 变成了同步访问，降低了性能，若需要变成异步，需要重写downloader
+            # 可去github上搜scrapy downloader
             self.browser.get(request.url)
             import time
             time.sleep(3)
 
             # 返回一个HtmlResponse给spider，将不会再调用downloader进行下载。
-            return HtmlResponse(url=self.browser.current_url, body=self.browser.page_source, encoding="utf-8",
+            return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source, encoding="utf-8",
                                 request=request)
