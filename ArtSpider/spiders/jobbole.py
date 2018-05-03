@@ -18,6 +18,9 @@ class JobboleSpider(scrapy.Spider):
     allowed_domains = ['blog.jobbole.com']
     start_urls = ['http://blog.jobbole.com/all-posts/']
 
+    # 收集伯乐在线所有404的url以及404页面数
+    handle_httpstatus_list = [404]
+
     def __init__(self):
         # 可共用一个浏览器，不用每个url都打开一个
         self.browser = webdriver.Chrome(executable_path="/home/mata/Tools/driver/chromedriver")
@@ -26,12 +29,20 @@ class JobboleSpider(scrapy.Spider):
         # 当信号量为signals.spider_closed时，调用相关函数
         dispatcher.connect(self.spider_closed, signals.spider_closed)
 
+        # 收集fail url
+        self.fail_urls = []
+
     def spider_closed(self, spider):
         # 爬虫退出的时候，关闭chrome
         print("spider closed")
         self.browser.close()
 
     def parse(self, response):
+        # 獲取404的url以及页面数
+        if response.status == 404:
+            self.fail_urls.append(response.url)
+            self.crawler.stats.inc_value("fail_url_count")
+
         # 获取当前页面所有文章url并进行解析
         nodes = response.xpath('//div[@class="post floated-thumb"]/div[@class="post-thumb"]/a')
         for node in nodes:
