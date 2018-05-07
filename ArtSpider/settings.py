@@ -69,8 +69,9 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     # 'ArtSpider.pipelines.ArtspiderPipeline': 300,
     # # 'scrapy.pipelines.images.ImagesPipeline': 1,
-    'ArtSpider.pipelines.ArticleImagePipeline': 1,
-    'ArtSpider.pipelines.MysqlTwistedPipeline': 10,
+    # 'ArtSpider.pipelines.ArticleImagePipeline': 1,
+    # 'ArtSpider.pipelines.MysqlTwistedPipeline': 10,
+    'ArtSpider.pipelines.ElasticsearchPipeline': 1,
 
 }
 # 为scrapy配置要从item中取出的参数

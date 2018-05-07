@@ -11,6 +11,7 @@ import pymysql
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exporters import JsonItemExporter
 from twisted.enterprise import adbapi
+from ArtSpider.models.es_types import LagouType
 
 
 class ArtspiderPipeline(object):
@@ -139,3 +140,32 @@ class JsonExporterPipleline(object):
     def close_spider(self):
         self.exporter.finish_exporting()
         self.file.close()
+
+
+class ElasticsearchPipeline(object):
+    # 将数据写入到es中
+    def process_item(self, item, spider):
+        # 将item转化为es的数据
+        lagou = LagouType()
+        lagou.title = item['title']
+        lagou.url = item['url']
+        lagou.salary_min = item['salary_min']
+        lagou.salary_max = item['salary_max']
+        lagou.job_city = item['job_city']
+        lagou.work_year_min = item['work_year_min']
+        lagou.work_year_max = item['work_year_max']
+        lagou.degree_need = item['degree_need']
+        lagou.job_type = item['job_type']
+        lagou.publish_time = item['publish_time']
+        lagou.tag = item['tag']
+        lagou.job_advantage = item['job_advantage']
+        lagou.job_desc = item['job_desc']
+        lagou.job_addr = item['job_addr']
+        lagou.company_url = item['company_url']
+        lagou.company_name = item['company_name']
+        lagou.crawl_time = item['crawl_time']
+        lagou.meta.id = item['url_object_id']
+
+        lagou.save()
+
+        return item
