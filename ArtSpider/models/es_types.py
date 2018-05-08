@@ -3,11 +3,27 @@ from elasticsearch_dsl import DocType, Date, Nested, Boolean, \
     analyzer, InnerDoc, Completion, Keyword, Text, Integer
 
 from elasticsearch_dsl.connections import connections
+from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
+
+# Define a default Elasticsearch client
 connections.create_connection(hosts=["127.0.0.1"])
+
+
+class CustomAnalyzer(_CustomAnalyzer):
+    # 重写get_analysis_definition方法
+    def get_analysis_definition(self):
+        return {}
+
+
+ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])#加入filter做大小写的转换
+
 
 class LagouType(DocType):
     # 拉勾职位类型
     # 在这里定义映射
+    # suggest = Completion(analyzer="ik_max_work") 理论上可以这样，但是elasticsearch_dsl源码有问题
+    #添加suggest字段，为了完成补全功能
+    suggest = Completion(analyzer=ik_analyzer)
     title = Text(analyzer="ik_max_word")
     url = Keyword()
     url_object_id = Keyword()

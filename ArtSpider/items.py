@@ -10,6 +10,11 @@ import re
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from scrapy.loader import ItemLoader
 from ArtSpider.settings import SQL_DATE_FORMAT, SQL_DATETIME_FORMAT
+from ArtSpider.models.es_types import LagouType
+from elasticsearch_dsl.connections import connections
+
+# 连接es
+es = connections.create_connection(LagouType._doc_type.using)
 
 # 用于删除提取的html中的tag
 from w3lib.html import remove_tags
@@ -154,6 +159,29 @@ def handle_jobaddr(value):
     return "".join(addr_list)
 
 
+def gen_suggests(index, info_tuple):
+    # 根据字符串生成搜索建议数组
+    used_words = set()
+    suggests = []
+    for text, weight in info_tuple:
+        if text:
+            # 调用es的analyze接口分析字符串,得到分词
+            words = es.indices.analyze(index=index, body={"text": text, 'analyzer': "ik_max_word"},
+                                       params={"filter": ["lowercase"]})
+            analyzed_words = set([w["token"] for w in words["tokens"] if len(w["token"]) > 1])
+            # 获取新增加的词
+            new_words = analyzed_words - used_words
+        else:
+            new_words = set()
+        if new_words:
+            suggests.append({
+                "input": list(new_words),
+                "weight": weight
+            })
+
+    return suggests
+
+
 class LagouJobItem(scrapy.Item):
     """
     拉勾网职位信息
@@ -216,7 +244,6 @@ class LagouJobItem(scrapy.Item):
 
     def save_to_es(self):
         # 将item转化为es的数据
-        from ArtSpider.models.es_types import LagouType
         lagou = LagouType()
         lagou.title = self['title']
         lagou.url = self['url']
@@ -236,6 +263,7 @@ class LagouJobItem(scrapy.Item):
         lagou.company_name = self['company_name']
         lagou.crawl_time = self['crawl_time']
         lagou.meta.id = self['url_object_id']
+        lagou.suggest = gen_suggests(LagouType._doc_type.index, ((lagou.title, 10), (lagou.tag, 7)))
 
         lagou.save()
 
