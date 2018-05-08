@@ -214,6 +214,33 @@ class LagouJobItem(scrapy.Item):
         )
         return insert_sql, parsms
 
+    def save_to_es(self):
+        # 将item转化为es的数据
+        from ArtSpider.models.es_types import LagouType
+        lagou = LagouType()
+        lagou.title = self['title']
+        lagou.url = self['url']
+        lagou.salary_min = self['salary_min']
+        lagou.salary_max = self['salary_max']
+        lagou.job_city = self['job_city']
+        lagou.work_year_min = self['work_year_min']
+        lagou.work_year_max = self['work_year_max']
+        lagou.degree_need = self['degree_need']
+        lagou.job_type = self['job_type']
+        lagou.publish_time = self['publish_time']
+        lagou.tag = self['tag']
+        lagou.job_advantage = self['job_advantage']
+        lagou.job_desc = self['job_desc']
+        lagou.job_addr = self['job_addr']
+        lagou.company_url = self['company_url']
+        lagou.company_name = self['company_name']
+        lagou.crawl_time = self['crawl_time']
+        lagou.meta.id = self['url_object_id']
+
+        lagou.save()
+
+        return
+
 
 """
 create table lagou_job(url varchar(300) not null,url_object_id varchar(50) not null primary key,
