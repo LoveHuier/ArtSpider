@@ -53,12 +53,23 @@ def remove_comment_tags(value):
         return value
 
 
+def get_publish_time(value):
+    value = value.replace("·", "").strip()
+    return value
+
+
+def get_content(value):
+    return value.strip()
+
+
 class JobBoleArticleItem(scrapy.Item):
     title = scrapy.Field(
         input_processor=MapCompose(lambda x: x + "-jobbole")
         # output_processor=TakeFirst()
     )
-    create_date = scrapy.Field()
+    create_date = scrapy.Field(
+        input_processor=MapCompose(get_publish_time)
+    )
     url = scrapy.Field()
     url_object_id = scrapy.Field()
     front_image_url = scrapy.Field(
@@ -78,7 +89,9 @@ class JobBoleArticleItem(scrapy.Item):
         input_processor=MapCompose(remove_comment_tags),
         output_processor=Join(",")
     )
-    content = scrapy.Field()
+    content = scrapy.Field(
+        input_processor=MapCompose(remove_tags, get_content)
+    )
 
     def get_insert_sql(self):
         insert_sql = """
