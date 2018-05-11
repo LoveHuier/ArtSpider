@@ -7,14 +7,18 @@
 
 import scrapy
 import re
+import redis
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from scrapy.loader import ItemLoader
 from ArtSpider.settings import SQL_DATE_FORMAT, SQL_DATETIME_FORMAT
-from ArtSpider.models.es_types import LagouType,JobboleType
+from ArtSpider.models.es_types import LagouType, JobboleType
 from elasticsearch_dsl.connections import connections
 
 # 连接es
 es = connections.create_connection(LagouType._doc_type.using)
+
+# 连接redis
+redis_cli = redis.StrictRedis(host="127.0.0.1")
 
 # 用于删除提取的html中的tag
 from w3lib.html import remove_tags
@@ -112,11 +116,14 @@ class JobBoleArticleItem(scrapy.Item):
         jobbole.url = self['url']
         jobbole.create_date = self['create_date']
         jobbole.tags = self['tags']
-        jobbole.content=self['content']
+        jobbole.content = self['content']
         jobbole.meta.id = self['url_object_id']
         jobbole.suggest = gen_suggests(LagouType._doc_type.index, ((jobbole.title, 10), (jobbole.tags, 7)))
 
         jobbole.save()
+
+        #计数存储于redis中
+        redis_cli.incr("jobbole_count")
 
         return
 
