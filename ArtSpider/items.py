@@ -10,7 +10,7 @@ import re
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from scrapy.loader import ItemLoader
 from ArtSpider.settings import SQL_DATE_FORMAT, SQL_DATETIME_FORMAT
-from ArtSpider.models.es_types import LagouType
+from ArtSpider.models.es_types import LagouType,JobboleType
 from elasticsearch_dsl.connections import connections
 
 # 连接es
@@ -64,7 +64,7 @@ def get_content(value):
 
 class JobBoleArticleItem(scrapy.Item):
     title = scrapy.Field(
-        input_processor=MapCompose(lambda x: x + "-jobbole")
+        # input_processor=MapCompose(lambda x: x + "-jobbole")
         # output_processor=TakeFirst()
     )
     create_date = scrapy.Field(
@@ -104,6 +104,21 @@ class JobBoleArticleItem(scrapy.Item):
                   , self['front_image_url'], self['front_image_path'], self['praise_nums'], self['comment_nums']
                   , self['tags'], self['content'])
         return insert_sql, parsms
+
+    def save_to_es(self):
+        # 将item转化为es的数据
+        jobbole = JobboleType()
+        jobbole.title = self['title']
+        jobbole.url = self['url']
+        jobbole.create_date = self['create_date']
+        jobbole.tags = self['tags']
+        jobbole.content=self['content']
+        jobbole.meta.id = self['url_object_id']
+        jobbole.suggest = gen_suggests(LagouType._doc_type.index, ((jobbole.title, 10), (jobbole.tags, 7)))
+
+        jobbole.save()
+
+        return
 
 
 class LagouJobItemLoader(ItemLoader):

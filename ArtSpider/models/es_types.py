@@ -1,6 +1,6 @@
 from datetime import datetime
 from elasticsearch_dsl import DocType, Date, Nested, Boolean, \
-    analyzer, InnerDoc, Completion, Keyword, Text, Integer
+    analyzer, Completion, Keyword, Text, Integer
 
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.analysis import CustomAnalyzer as _CustomAnalyzer
@@ -15,14 +15,14 @@ class CustomAnalyzer(_CustomAnalyzer):
         return {}
 
 
-ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])#加入filter做大小写的转换
+ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])  # 加入filter做大小写的转换
 
 
 class LagouType(DocType):
     # 拉勾职位类型
     # 在这里定义映射
     # suggest = Completion(analyzer="ik_max_work") 理论上可以这样，但是elasticsearch_dsl源码有问题
-    #添加suggest字段，为了完成补全功能
+    # 添加suggest字段，为了完成补全功能
     suggest = Completion(analyzer=ik_analyzer)
     title = Text(analyzer="ik_max_word")
     url = Keyword()
@@ -48,5 +48,22 @@ class LagouType(DocType):
         doc_type = "job"
 
 
+class JobboleType(DocType):
+    suggest = Completion(analyzer=ik_analyzer)
+    title = Text(analyzer="ik_max_word")
+    create_date = Date()
+    url = Keyword()
+    comment_nums = Integer()
+    fav_nums = Integer()
+    praise_nums = Integer()
+    tags = Text(analyzer="ik_max_word")
+    content = Text(analyzer="ik_max_word")
+
+    class Meta:
+        index = "jobbole"
+        doc_type = "article"
+
+
 if __name__ == "__main__":
-    LagouType.init()
+    # LagouType.init()
+    JobboleType.init()
